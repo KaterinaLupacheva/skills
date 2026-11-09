@@ -13,6 +13,8 @@ Each skill shows the diff and the conflicts, then commits. Neither one pushes.
 
 clean-mode's tools have no skill. To update crapper, dryer, and mutator, run `./update-clean-mode.sh`. When ub-mode changed upstream, it prints a compare link. Port what applies into `skills/clean-mode/SKILL.md` by hand.
 
+`skill-doctor` and `resolve-merge-conflicts` were copied by hand from warpdotdev/common-skills at `8792394`, and they have no update script. Their scripts and the skill-doctor scorers are upstream's, with two local edits. `collect_sessions.py` also reads global skills from `--claude-home`, so `CLAUDE_CONFIG_DIR` setups get graded. The procedure-compliance scorer names CLAUDE.md instead of WARP.md. Upstream's Warp-branded HTML report and its bundled diff viewer were dropped, so skill-doctor writes Markdown. Both SKILL.md files are rewritten, so merge upstream changes into them by hand.
+
 After an update adds or drops a skill, or after I add one of my own, update the tables in `README.md`.
 
 ## Set up a new machine

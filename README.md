@@ -1,9 +1,10 @@
 # Claude Code skills
 
-A collection of skills for [Claude Code](https://claude.com/claude-code). It bundles two outside skill sets with a few skills of my own:
+A collection of skills for [Claude Code](https://claude.com/claude-code). It bundles two outside skill sets, two skills adapted from Warp, and a few skills of my own:
 
 - **pstack** by Lauren Tan, ported from Cursor to Claude Code. Upstream is [cursor/plugins/pstack](https://github.com/cursor/plugins/tree/main/pstack). It is an agent working style built on `/poteto-mode`, with parallel subagents, adversarial review, verified work, and 24 engineering principles.
 - **Matt Pocock's skills** from [mattpocock/skills](https://github.com/mattpocock/skills). They cover planning, specs, tickets, TDD, and code review.
+- **Two skills from Warp's** [common-skills](https://github.com/warpdotdev/common-skills/tree/main/.agents/skills), adapted for Claude Code. `/skill-doctor` grades your skills from your conversation history. `resolve-merge-conflicts` adds Matt Pocock's intent-first conflict steps.
 - **My own skills.** `/clean-mode` adapts Uncle Bob's [ub-mode](https://github.com/unclebob/ub-mode) to TypeScript. `/step-plan`, `/recap`, and `rtl-check` are smaller helpers.
 
 Each upstream set is pulled in with a script, and the Claude Code port of pstack is described in [PORTING.md](PORTING.md).
@@ -187,6 +188,13 @@ Good first steps:
 | `/retro` | Runs a retrospective on a coding session. |
 | `/teach` | Teaches you a skill or concept inside the workspace. |
 | `/wait-what` | Re-pitches a message that didn't land. |
+
+### Warp
+
+| Skill | What it does |
+| --- | --- |
+| `/skill-doctor` | Scores recent Claude Code conversations for efficiency, code quality, procedure compliance, and verbosity, then drafts skill edits backed by the conversations that went badly. It writes a Markdown report to a temp directory and never edits your skills on its own. Needs Python 3.9 or later. |
+| `/resolve-merge-conflicts` (Auto) | Resolves a stopped merge, rebase, cherry-pick, or stash pop. It reads why each side changed, then shows only the conflict hunks through a script instead of whole files. Needs Python 3.9 or later. |
 
 ## Repository layout
 
