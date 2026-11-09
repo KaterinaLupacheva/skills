@@ -23,7 +23,7 @@ If the prototype is for something that doesn't yet have a page but *would natura
 
 ### Sub-shape B: a new page (last resort)
 
-Only use this when the thing being prototyped genuinely has no existing page to live inside (e.g. an entirely new top-level surface, or a flow that can't be embedded anywhere sensible).
+Only use this when the thing being prototyped genuinely has no existing page to live inside (e.g. an entirely new top-level surface, or a flow that can't be embedded anywhere sensible), or when reaching the state under test on the host page takes sign-in or earlier steps of a flow. In that second case the user can't flip variants without replaying the flow, so build the new page from the host page's real layout and components, stub every earlier step's result, and skip sign-in, so each variant opens straight into the state being judged.
 
 Create a **throwaway route** following whatever routing convention the project already uses. Don't invent a new top-level structure. Name it so it's obviously a prototype (e.g. include the word `prototype` in the path or filename). Same `?variant=` pattern.
 
