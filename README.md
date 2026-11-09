@@ -5,7 +5,7 @@ A collection of skills for [Claude Code](https://claude.com/claude-code). It bun
 - **pstack** by Lauren Tan, ported from Cursor to Claude Code. Upstream is [cursor/plugins/pstack](https://github.com/cursor/plugins/tree/main/pstack). It is an agent working style built on `/poteto-mode`, with parallel subagents, adversarial review, verified work, and 24 engineering principles.
 - **Matt Pocock's skills** from [mattpocock/skills](https://github.com/mattpocock/skills). They cover planning, specs, tickets, TDD, and code review.
 - **Two skills from Warp's** [common-skills](https://github.com/warpdotdev/common-skills/tree/main/.agents/skills), adapted for Claude Code. `/skill-doctor` grades your skills from your conversation history. `resolve-merge-conflicts` adds Matt Pocock's intent-first conflict steps.
-- **My own skills.** `/clean-mode` adapts Uncle Bob's [ub-mode](https://github.com/unclebob/ub-mode) to TypeScript. `/step-plan`, `/recap`, `rtl-check`, and `draft-message` are smaller helpers.
+- **My own skills.** `/clean-mode` adapts Uncle Bob's [ub-mode](https://github.com/unclebob/ub-mode) to TypeScript. `/step-plan`, `/recap`, `rtl-check`, `draft-message`, and `/test-audit` are smaller helpers.
 
 Each upstream set is pulled in with a script, and the Claude Code port of pstack is described in [PORTING.md](PORTING.md).
 
@@ -107,6 +107,7 @@ Good first steps:
 | `/recap [days] [path]` | Summarizes what changed in a git project over the last N days: features, changed areas, database, and structure. The defaults are 7 days and the current directory. |
 | `/rtl-check` (Auto) | Finds directional CSS properties such as `margin-left` that have no RTL handling, and suggests logical-property fixes. |
 | `/draft-message` (Auto) | Drafts a message you will send to someone else, such as a Jira comment, a Slack reply, or a handover note. It keeps the draft short and focused on what the recipient must do. When you paste your own draft, it fixes only what is wrong and keeps your wording. It never posts for you. |
+| `/test-audit [path]` | Reads a test suite and lists tests that can't catch a bug: imports of missing code, assertions that may never run or can't fail, and flaky inputs such as real time or unseeded randomness. It never runs or edits tests. Based on the idea of [test-audit](https://github.com/javiAI/project-operating-system/blob/HEAD/.claude/skills/test-audit/SKILL.md) by javiAI. |
 
 ### pstack
 
