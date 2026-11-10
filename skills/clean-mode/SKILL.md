@@ -154,7 +154,7 @@ After the last unit passes, before the gates:
 
 ### Gates
 
-Run from the project root, after the project's typecheck and test scripts pass. `TOOLS` is the `tools/` folder next to this file. The gates cover every function you added or edited. Violations from the baseline in functions you left alone go into the report, unfixed.
+Run from the project root, after the project's full typecheck and test scripts pass. Run the whole test script, not only the tests of the files you touched: a changed id, type or shared fixture breaks tests in other files. `TOOLS` is the `tools/` folder next to this file. The gates cover every function you added or edited. Violations from the baseline in functions you left alone go into the report, unfixed.
 
 1. **CRAP**: every function scores below 10.
    ```bash
@@ -188,6 +188,8 @@ Tool facts the output won't tell you:
 - `--changed` reads `git status`, so it includes untracked files. It reports every function in a touched file, which is why the baseline matters.
 - The tools write `.metrics/` and `target/` into the project. If the project doesn't ignore them, add both to `.git/info/exclude` so they stay out of the diff.
 - crapper collects coverage itself. In a Vitest project it installs `@vitest/coverage-v8` without saving it, and restores `package.json` afterwards. Other test runners are wrapped in `c8`, and a `coverage` script is used as it is.
+- crapper merges every `target/coverage/**/lcov.info` and `coverage/**/lcov.info`, and the last report read wins. An old, git-ignored `coverage/lcov.info` makes a tested file show 0%: move it aside for the run, then put it back.
+- Coverage sees only Node and jsdom tests. A function that only browser tests run (Storybook, Playwright) shows 0%, so its CRAP is CC² + CC. In a Vitest workspace with a browser project, pass `--coverage-command` that runs only the unit project. For a story-only function, report its complexity and the stories that cover it instead of a failing score.
 - mutator runs `npm test` from the nearest `package.json`. Pass `--test-command "<cmd>"` to run a narrower suite. Later runs only retest survivors and functions whose text changed.
 - mutator rewrites source files in place while it runs. Make no edits until it finishes. A dev server or Storybook with hot reload sees every rewrite and can stop responding, so stop it first or restart it after. Parallel workers each run the test command, so a large suite can exhaust memory: keep the suite narrow or pass `--max-workers`.
 - The first run of each tool builds its Python virtualenv. `run.sh` picks Python 3.11 or newer.
