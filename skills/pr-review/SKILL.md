@@ -102,6 +102,10 @@ Reviewed `<short headRefOid>`. Spec: #<N>. Dropped: <count and reason, or "none"
 
 For **PASS**, write `None.` under "Must fix".
 
-Post the report unless `$ARGUMENTS` has `--no-post` or step 1 found no PR. Find an earlier report with `gh api 'repos/{owner}/{repo}/issues/<n>/comments' --paginate --jq '.[] | select(.body | startswith("<!-- pr-review -->")) | .id'`. When one exists, update it with `gh api -X PATCH repos/{owner}/{repo}/issues/comments/<id> -F body=@<file>`. Otherwise run `gh api 'repos/{owner}/{repo}/issues/<n>/comments' -F body=@<file>`. Then remove the worktree from step 1, if you made one.
+Post the report unless `$ARGUMENTS` has `--no-post` or step 1 found no PR. Find an earlier report with `gh api 'repos/{owner}/{repo}/issues/<n>/comments' --paginate --jq '.[] | select(.body | startswith("<!-- pr-review -->")) | .id'`. When one exists, update it with `gh api -X PATCH repos/{owner}/{repo}/issues/comments/<id> -F body=@<file>`. Otherwise run `gh api 'repos/{owner}/{repo}/issues/<n>/comments' -F body=@<file>`.
+
+After posting, swap the PR's labels to the verdict. Remove `needs-review`, `review-pass`, and `review-fail` with `gh api -X DELETE 'repos/{owner}/{repo}/issues/<n>/labels/<label>'`, ignoring the 404 for a label the PR doesn't have. Then add `review-pass` or `review-fail` with `gh api 'repos/{owner}/{repo}/issues/<n>/labels' -f 'labels[]=<label>'`. Remove `needs-review` before adding the verdict. A scheduled task that fires on `needs-review` being labeled would otherwise see the verdict label as another matching event and start a new review. Skip the labels whenever you skip posting.
+
+Then remove the worktree from step 1, if you made one.
 
 End your reply with the verdict line, the must-fix titles, and the comment's URL.
