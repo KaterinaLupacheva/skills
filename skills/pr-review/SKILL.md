@@ -54,26 +54,26 @@ Done when both reports are in.
 
 ## 5. Verify
 
-Check every finding a reviewer claims is must-fix yourself:
+Check every finding you will report yourself, advisory ones included:
 
-- Re-read the cited lines at `headRefOid`.
+- Re-read the cited lines at `headRefOid`, and correct the `file:line` when it is off. For an advisory finding, this check is enough.
 - Rerun the repro command and compare its output with the report.
 - Find the quoted criterion or rule in its source.
 
 Keep a finding as must-fix when the evidence holds and it meets the verdict rule below. Move it to advisory when it holds but misses the rule. Drop it when the evidence doesn't hold, and count it under "Dropped" with the reason. Merge findings that share a root cause.
 
-Done when every must-fix finding carries evidence you confirmed yourself.
+Done when every finding you report cites lines you re-read, and every must-fix finding carries evidence you confirmed yourself.
 
 ## Verdict rule
 
 **FAIL** when any one of these holds; otherwise **PASS**:
 
 1. A required check **failed** or is **missing**.
-2. An acceptance criterion is missed, partly done, or done wrongly.
+2. An acceptance criterion from a linked issue is missed, partly done, or done wrongly.
 3. A proven bug or regression that breaks the spec or the PR's stated behavior on a path a real user can hit in normal use. Name that path in the finding. A bug that needs unusual timing or input to reach, or whose worst outcome is the behavior before the PR, is advisory, and its advisory line says so.
 4. A broken written repo rule, including a weakened lint rule, test, or quality setting without the documented reason the rules ask for.
 
-Everything else is advisory: smells, naming, extra scope that breaks nothing, a risk that needs a future change to matter, and a check you'd add beyond what the rules require.
+Everything else is advisory: smells, naming, extra scope that breaks nothing, a PR body with no linked issue that claims more than the diff does (rule 3 still fails behavior the body promises and the diff breaks), a risk that needs a future change to matter, and a check you'd add beyond what the rules require.
 
 ## 6. Report
 
