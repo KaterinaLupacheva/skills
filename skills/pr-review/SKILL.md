@@ -11,10 +11,12 @@ Decide whether one PR is ready to merge. Every finding is either **must-fix**, m
 
 Run unattended. Nobody is there to answer questions, so resolve every gap yourself and name the assumption in the report.
 
+Talk to GitHub only through `gh api` REST calls. Claude cloud sessions block GitHub GraphQL, which `gh pr` and `gh issue` use.
+
 ## 1. Pin the PR
 
-- The PR is the number in `$ARGUMENTS`, otherwise the PR for the current branch (`gh pr view`). With no PR at all, review the current branch against the default branch's merge base, and skip posting.
-- Read it: `gh pr view <n> --json number,title,body,baseRefName,headRefOid,closingIssuesReferences,files`.
+- The PR is the number in `$ARGUMENTS`, otherwise the open PR for the current branch (`gh api 'repos/{owner}/{repo}/pulls?head={owner}:<branch>&state=open'`). With no PR at all, review the current branch against the default branch's merge base, and skip posting.
+- Read it: `gh api 'repos/{owner}/{repo}/pulls/<n>'`. Its `base.ref` is `<base>` and its `head.sha` is `headRefOid` below.
 - Review the PR's head commit without touching the user's checkout. Run `git fetch origin <base> pull/<n>/head`. If `HEAD` is already `headRefOid` and the tree is clean, review in place. Otherwise run `git worktree add --detach <scratchpad>/pr-<n> <headRefOid>` and work there, installing dependencies the way the repo's docs or lockfile say.
 - A new worktree has no env file. Build one from the `.env.example` at `headRefOid`: take each variable it lists from the main checkout's `.env`, and for one the main `.env` lacks, take the non-secret value `.env.example` gives. The main checkout's `.env` follows today's code, so a copy of it can fail the PR's checks on variables the PR's code still needs.
 - The diff is `git diff origin/<base>...<headRefOid>`, and the commit list is `git log --oneline origin/<base>..<headRefOid>`.
@@ -25,7 +27,7 @@ Done when the diff is non-empty and you hold the PR body, the diff command, and 
 
 Read the rule and validation files as they are at `headRefOid`, in the review directory. A rule added to the base branch after the PR's commit doesn't apply to it.
 
-- **Spec**: every issue in `closingIssuesReferences`, plus any `#N` that the PR body or commit messages name as the work item. Read each one with `gh issue view <N> --comments`. Its acceptance criteria are the spec. With no issue, the PR body's stated goal is the spec, and the report says so.
+- **Spec**: every `#N` that the PR body or commit messages close (`Closes #N`, `Fixes #N`) or name as the work item. Read each one with `gh api 'repos/{owner}/{repo}/issues/<N>'` and its comments with `gh api 'repos/{owner}/{repo}/issues/<N>/comments' --paginate`. Its acceptance criteria are the spec. With no issue, the PR body's stated goal is the spec, and the report says so.
 - **Rules**: `AGENTS.md`, `CLAUDE.md`, `CODING_STANDARDS.md`, `CONTRIBUTING.md`, and every doc they point to that covers the changed files.
 - **Required validation**: the repo's table or list of checks each kind of change needs (in `teach` it is `docs/agents/change-protocol.md` §5). With none written, use the `package.json` scripts that typecheck, lint, and test.
 
@@ -45,11 +47,10 @@ Spawn two `general-purpose` subagents in one message, foreground. Give each one 
 
 - **Spec and rules** (`model: sonnet`). Pass the spec text and the rule files. "First, list each acceptance criterion the diff misses, covers only partly, or implements wrongly, quoting the criterion and the hunk. Then list each place the diff breaks a written rule, citing the file and the rule, and skip what the step 3 checks already enforce. List behavior the spec didn't ask for, and code smells, naming, and structure you would change, as advisory."
 - **Bugs** (`model: opus`). Pass the PR's stated intent. "Break this change: wrong output, a crash, a regression in code that calls the changed code, stored data the new code can't read, a race. Prove each finding with a run against the real code: a failing test, a repro script, or command output. Put temporary test files in the review directory and delete them before you report. A finding you could only trace by reading counts when you give the concrete input, the path through the code, and why no run was possible here."
-- **Rules** (`model: sonnet`). Pass the rule files. "List each place the diff breaks a written rule, citing the file and the rule. Skip what the step 3 checks already enforce. List code smells, naming, and structure you would change as advisory."
 
 When the tool rejects a `model`, drop it, spawn again, and note this in the report.
 
-Done when all three reports are in.
+Done when both reports are in.
 
 ## 5. Verify
 
@@ -101,6 +102,6 @@ Reviewed `<short headRefOid>`. Spec: #<N>. Dropped: <count and reason, or "none"
 
 For **PASS**, write `None.` under "Must fix".
 
-Post the report unless `$ARGUMENTS` has `--no-post` or step 1 found no PR. When the PR already has a comment starting with `<!-- pr-review -->`, update it with `gh api -X PATCH repos/{owner}/{repo}/issues/comments/<id> -F body=@<file>`. Otherwise run `gh pr comment <n> --body-file <file>`. Then remove the worktree from step 1, if you made one.
+Post the report unless `$ARGUMENTS` has `--no-post` or step 1 found no PR. Find an earlier report with `gh api 'repos/{owner}/{repo}/issues/<n>/comments' --paginate --jq '.[] | select(.body | startswith("<!-- pr-review -->")) | .id'`. When one exists, update it with `gh api -X PATCH repos/{owner}/{repo}/issues/comments/<id> -F body=@<file>`. Otherwise run `gh api 'repos/{owner}/{repo}/issues/<n>/comments' -F body=@<file>`. Then remove the worktree from step 1, if you made one.
 
 End your reply with the verdict line, the must-fix titles, and the comment's URL.
