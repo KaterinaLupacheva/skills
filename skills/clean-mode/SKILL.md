@@ -178,6 +178,7 @@ Each fix changes code, so rerun the gates that apply. Done when a single pass of
 ### Prove It Works
 
 - Run the acceptance check against the real artifact: run the feature, read the actual value, inspect the diff. A passing compile or a subagent's report is a proxy.
+- When the project has a `verify-*` skill (the one that drives the real app) and its repository instructions require a proof for this change type, run that proof on the changed path. For a bug fix, reproduce the bug through the same surface first, then show it gone.
 
 ### Explain the Number
 
@@ -202,6 +203,7 @@ Tool facts the output won't tell you:
 The final reply contains:
 
 - the acceptance check and its result
+- the `verify-*` proof's evidence directory, or the exact command, the condition that blocked it, and what stays unverified
 - the gate results, as the worst CRAP score, the duplicate pairs, and killed/survived/uncovered counts (or the files the mutation gate skipped, and why)
 - what `/no-comments` and `/unslop` changed
 - baseline violations left in place
