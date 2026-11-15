@@ -37,7 +37,7 @@ Done when you can name the spec, the rule files, and the required checks for thi
 
 Run every required check that can run here, once, in the review directory. Record the command, the exit code, and the failing lines.
 
-A check that needs something this session lacks, such as Docker, a running app, a live model, or the `verify-*` skill's setup, counts as **evidenced** when the PR body shows its result: the command and its output, or a proof's screenshots and readback. Record which checks were evidenced and which were neither run nor evidenced.
+A check that needs something this session lacks, such as Docker, a running app, a live model, or the `verify-*` skill's setup, counts as **evidenced** when the PR body shows its result: the command and its output, or a written proof that names the screen or path it drove, what it saw before and after the change, and the value it read back. Screenshots stay in the session that took them, so a proof without them still counts when it gives those three. Record which checks were evidenced and which were neither run nor evidenced.
 
 Done when every required check is **passed**, **failed**, **evidenced**, or **missing**.
 
