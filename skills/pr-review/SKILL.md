@@ -15,7 +15,7 @@ Talk to GitHub only through `gh api` REST calls. Claude cloud sessions block Git
 
 ## 1. Pin the PR
 
-- The PR is the number in `$ARGUMENTS`, otherwise the open PR for the current branch (`gh api 'repos/{owner}/{repo}/pulls?head={owner}:<branch>&state=open'`). With no PR at all, review the current branch against the default branch's merge base, and skip posting.
+- The PR is the number in `$ARGUMENTS`. Otherwise it is the open PR that contains `HEAD`, found with `gh api "repos/{owner}/{repo}/commits/$(git rev-parse HEAD)/pulls" --jq '.[] | select(.state == "open") | .number'`. This covers a run a PR event starts, which begins at the PR's head commit and may have no branch checked out. Otherwise it is the open PR for the current branch (`gh api 'repos/{owner}/{repo}/pulls?head={owner}:<branch>&state=open'`). With no PR at all, review the current branch against the default branch's merge base, and skip posting.
 - Read it: `gh api 'repos/{owner}/{repo}/pulls/<n>'`. Its `base.ref` is `<base>` and its `head.sha` is `headRefOid` below.
 - Review the PR's head commit without touching the user's checkout. Run `git fetch origin <base> pull/<n>/head`. If `HEAD` is already `headRefOid` and the tree is clean, review in place. Otherwise run `git worktree add --detach <scratchpad>/pr-<n> <headRefOid>` and work there, installing dependencies the way the repo's docs or lockfile say.
 - A new worktree has no env file. Build one from the `.env.example` at `headRefOid`: take each variable it lists from the main checkout's `.env`, and for one the main `.env` lacks, take the non-secret value `.env.example` gives. The main checkout's `.env` follows today's code, so a copy of it can fail the PR's checks on variables the PR's code still needs.
