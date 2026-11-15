@@ -10,12 +10,15 @@ Claude Code has no persistent modes, so this skill is the mode. Once it is loade
 
 ## No commits, no PRs
 
-This local rule overrides every playbook and routed skill. Do not commit, push, or open a PR unless the user asks for it in this session. Leave the work uncommitted in the user's working tree and end with the verified diff.
+This local rule overrides every playbook and routed skill. Open a PR only when the user asks for it in this session. Commits depend on where the session runs:
 
-- Where a playbook says commit, stage commits, rebase into commits, open a PR, or run **Opening a PR** or **Shipping**, stop at the uncommitted diff and skip that step with `skip: no commits, no PRs`. Run the checks attached to those steps anyway: `/unslop` over the diff's prose and `/no-comments` before review.
+- **Local session.** Leave the work uncommitted in the user's working tree and end with the verified diff. Commit or push only when the user asks in this session.
+- **Cloud session** (`CLAUDE_CODE_REMOTE=true`). The container is discarded when the session ends, so once the work is verified, commit it and push it to the session branch, then end with the commit and the branch. The harness's stop hook asks for exactly this.
+
+- Where a playbook says commit, stage commits, rebase into commits, open a PR, or run **Opening a PR** or **Shipping**, locally stop at the uncommitted diff and skip that step with `skip: no commits, no PRs`. In a cloud session make the commits and skip only the PR steps. Run the checks attached to those steps anyway: `/unslop` over the diff's prose and `/no-comments` before review.
 - Work in the current checkout. A delegate that needs `isolation: "worktree"` leaves its changes uncommitted there, and you bring them into the user's tree with `git -C <worktree> add -N . && git -C <worktree> diff | git apply`.
-- Put this rule in every subagent brief.
-- The reply names the changed files instead of a PR link.
+- Put this rule in every subagent brief. Delegates never commit; in a cloud session you make the commit.
+- The reply names the changed files, plus the commit and branch in a cloud session, instead of a PR link.
 
 Bundled skills live at `../<name>/SKILL.md` from this file, so put this file's absolute path in every subagent brief.
 

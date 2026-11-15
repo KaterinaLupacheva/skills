@@ -78,7 +78,7 @@ Matt Pocock's skills (`update-mattpocock.sh`) own the names `tdd` and `teach` he
 
 ## Local rule: no commits, no PRs
 
-Not part of the Cursor port, but re-applied the same way. poteto-mode never commits, pushes, or opens a PR unless the user asks in that session. It lives in three places: the `## No commits, no PRs` section near the top of `poteto-mode/SKILL.md`, the skip line at the top of `poteto-mode/playbooks/opening-a-pr.md`, and the matching paragraph in `agents/poteto-agent.md`. `check-port.sh` fails if a sync drops any of them.
+Not part of the Cursor port, but re-applied the same way. poteto-mode never opens a PR unless the user asks in that session. Locally it never commits or pushes unasked either; in a cloud session (`CLAUDE_CODE_REMOTE=true`) it commits and pushes verified work to the session branch, because the container is discarded. It lives in three places: the `## No commits, no PRs` section near the top of `poteto-mode/SKILL.md`, the skip line at the top of `poteto-mode/playbooks/opening-a-pr.md`, and the matching paragraph in `agents/poteto-agent.md`. `check-port.sh` fails if a sync drops any of them.
 
 ## Not portable
 

@@ -1,6 +1,6 @@
 ---
 name: clean-mode
-description: Uncle Bob's ub-mode for TypeScript. Plan before coding, then TDD, then the CRAP and duplication gates, plus the mutation gate for pure logic. Work stays uncommitted.
+description: Uncle Bob's ub-mode for TypeScript. Plan before coding, then TDD, then the CRAP and duplication gates, plus the mutation gate for pure logic. Work stays uncommitted locally and is pushed to the session branch in a cloud session.
 disable-model-invocation: true
 ---
 
@@ -16,7 +16,10 @@ Each `###` heading below, and each bold name marked *(principle)*, is a principl
 
 ## No commits, no PRs
 
-Leave the work uncommitted in the user's working tree and end with the verified diff. Commit, push, or open a PR only when the user asks for it in this session.
+Open a PR only when the user asks for it in this session. Commits depend on where the session runs:
+
+- **Local session.** Leave the work uncommitted in the user's working tree and end with the verified diff. Commit or push only when the user asks in this session.
+- **Cloud session** (`CLAUDE_CODE_REMOTE=true`). The container is discarded when the session ends, so once the Report's checks pass, commit the work and push it to the session branch, then end with the commit and the branch. The harness's stop hook asks for exactly this. Delegates never commit; you make the commit.
 
 ## Subagents
 
