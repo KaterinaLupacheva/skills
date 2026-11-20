@@ -3,3 +3,4 @@ skills/synced/
 agents-upstream/
 skills/clean-mode/tools/*/.venv/
 skills/clean-mode/tools/*/src/*.egg-info/
+skills/.trash/
