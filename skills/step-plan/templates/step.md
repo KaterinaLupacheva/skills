@@ -35,4 +35,4 @@ Read decisions <D numbers> from `decisions.md` before you start, with the comman
 
 ## Done when
 
-Every box above is checked with its evidence. When the session runs clean-mode, its gates are clean too. Set this step's row in the README.
+Every box above is checked with its evidence. When the session runs clean-mode, its gates are clean too. Set this step's row in the README, and end the reply with the prompt for the next step (README **How to run a step**, item 7).
