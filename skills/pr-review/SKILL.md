@@ -30,8 +30,9 @@ Read the rule and validation files as they are at `headRefOid`, in the review di
 - **Spec**: every `#N` that the PR body or commit messages close (`Closes #N`, `Fixes #N`) or name as the work item. Read each one with `gh api 'repos/{owner}/{repo}/issues/<N>'` and its comments with `gh api 'repos/{owner}/{repo}/issues/<N>/comments' --paginate`. Its acceptance criteria are the spec. With no issue, the PR body's stated goal is the spec, and the report says so.
 - **Rules**: `AGENTS.md`, `CLAUDE.md`, `CODING_STANDARDS.md`, `CONTRIBUTING.md`, and every doc they point to that covers the changed files.
 - **Required validation**: the repo's table or list of checks each kind of change needs (in `teach` it is `docs/agents/change-protocol.md` §5). With none written, use the `package.json` scripts that typecheck, lint, and test.
+- **Product intent**: plan and context docs for this work, such as `docs/plans/<ticket>*`, `CONTEXT.md`, and ADRs. Look in the main checkout too, because plan docs are often git-ignored (check `.git/info/exclude`) and so missing from the worktree. Note the release flags that gate the changed code and whether each is on in production. These decide whether a path is reachable and whether a behavior is intended.
 
-Done when you can name the spec, the rule files, and the required checks for this diff's change types.
+Done when you can name the spec, the rule files, the required checks for this diff's change types, and the plan docs and flags you found (or "none").
 
 ## 3. Run the checks
 
@@ -46,7 +47,7 @@ Done when every required check is **passed**, **failed**, **evidenced**, or **mi
 Spawn two `general-purpose` subagents in one message, foreground. Give each one the review directory, the diff command, the commit list, the check results from step 3, and its brief below. Each brief ends with: "Report under 400 words. For each finding give a title, `file:line`, the evidence, the fix, and whether you claim it is must-fix. No findings is a valid result."
 
 - **Spec and rules** (`model: sonnet`). Pass the spec text and the rule files. "First, list each acceptance criterion the diff misses, covers only partly, or implements wrongly, quoting the criterion and the hunk. Then list each place the diff breaks a written rule, citing the file and the rule, and skip what the step 3 checks already enforce. List behavior the spec didn't ask for, and code smells, naming, and structure you would change, as advisory."
-- **Bugs** (`model: opus`). Pass the PR's stated intent. "Break this change: wrong output, a crash, a regression in code that calls the changed code, stored data the new code can't read, a race. Prove each finding with a run against the real code: a failing test, a repro script, or command output. Put temporary test files in the review directory and delete them before you report. A finding you could only trace by reading counts when you give the concrete input, the path through the code, and why no run was possible here."
+- **Bugs** (`model: opus`). Pass the PR's stated intent, the plan docs, and the release flags. "Break this change: wrong output, a crash, a regression in code that calls the changed code, a race. Check these in particular: data that the old code or its forms let users save but the new code can't read; a missing or empty scope (store, tenant, user ID) that makes a query match or change other stores' rows; a double click or retry on a create or duplicate action; a failed read that sends 0, null, or stale values downstream; a tool or endpoint that reports success when it failed; an endpoint that changes data without auth; other paths that have the same problem the PR says it fixes; and a deploy-order, migration, or backfill step the PR needs but doesn't state. For each finding, give an impact line: who reaches it (user action, API-key client, cron, webhook, MCP tool), how, and the worst outcome. Prove each finding with a run against the real code: a failing test, a repro script, or command output. Put temporary test files in the review directory and delete them before you report. A finding you could only trace by reading counts when you give the concrete input, the path through the code, and why no run was possible here."
 
 When the tool rejects a `model`, drop it, spawn again, and note this in the report.
 
@@ -60,6 +61,8 @@ Check every finding you will report yourself, advisory ones included:
 - Rerun the repro command and compare its output with the report.
 - Find the quoted criterion or rule in its source.
 
+Before you keep a bug as must-fix, check its path against the plan docs and release flags from step 2. A path behind a flag that is off in production, or a behavior a plan doc says is intended, is advisory, and its line names the flag or doc.
+
 Keep a finding as must-fix when the evidence holds and it meets the verdict rule below. Move it to advisory when it holds but misses the rule. Drop it when the evidence doesn't hold, and count it under "Dropped" with the reason. Merge findings that share a root cause.
 
 Done when every finding you report cites lines you re-read, and every must-fix finding carries evidence you confirmed yourself.
@@ -70,10 +73,23 @@ Done when every finding you report cites lines you re-read, and every must-fix f
 
 1. A required check **failed** or is **missing**.
 2. An acceptance criterion from a linked issue is missed, partly done, or done wrongly.
-3. A proven bug or regression that breaks the spec or the PR's stated behavior on a path a real user can hit in normal use. Name that path in the finding. A bug that needs unusual timing or input to reach, or whose worst outcome is the behavior before the PR, is advisory, and its advisory line says so.
-4. A broken written repo rule, including a weakened lint rule, test, or quality setting without the documented reason the rules ask for.
+3. A proven bug or regression that breaks the spec or the PR's stated behavior on a path a real user can hit in normal use. Name that path in the finding.
+4. A proven bug that any production caller can trigger (a user action including a double click, an API-key client, a cron, a webhook, a live MCP tool) whose worst outcome is one of the following. How rare the timing or input is doesn't matter.
+   - Data loss, corruption, or a change to another store's or tenant's data.
+   - Wrong values sent to an outside system or partner, or a tool that reports success when it failed.
+   - An endpoint that reads private data or changes data without auth.
+   - A crash or 500 on data the old code or its forms let users save, unless a read-only query or the PR body shows production has no such rows.
+5. An incomplete fix: the PR says it fixes a problem, and another reachable path in the same code still has it.
+6. A deploy-order, migration, backfill, or config step the PR needs that the PR body doesn't state. Stating it in the body resolves the finding.
+7. A broken written repo rule, including a weakened lint rule, test, or quality setting without the documented reason the rules ask for.
+
+A bug that rules 3–6 don't cover, such as one that needs unusual timing or input and whose worst outcome is the behavior before the PR, is advisory, and its line says so.
 
 Everything else is advisory: smells, naming, extra scope that breaks nothing, a PR body with no linked issue that claims more than the diff does (rule 3 still fails behavior the body promises and the diff breaks), a risk that needs a future change to matter, and a check you'd add beyond what the rules require.
+
+Sort advisory findings into two groups:
+- **Fix before merge**: a real defect or risk with a small, low-risk fix. Each line gives the impact and the fix, so the author can act without asking which ones matter.
+- **Notes**: naming, style, structure, scope, and tests you'd add.
 
 ## 6. Report
 
@@ -86,10 +102,13 @@ Write the report in this shape. The first line is the verdict, so a reader or a 
 <One sentence: what the PR sets out to do and whether it does.>
 
 ## Must fix
-1. **<title>** (`path/to/file.ts:42`). <What is wrong.> <Evidence: the failed command and its output, the quoted criterion, the repro output, or the cited rule.> **Fix:** <the change that resolves it.>
+1. **<title>** (`path/to/file.ts:42`, rule <n>). <What is wrong.> **Impact:** <who reaches it, how, worst outcome.> <Evidence: the failed command and its output, the quoted criterion, the repro output, or the cited rule.> **Fix:** <the change that resolves it.>
 
-## Advisory
-- <one line each, at most five, most useful first>
+## Fix before merge
+- **<title>** (`file:line`). <Impact.> **Fix:** <change>. <one line each, at most five, most serious first, or "None.">
+
+## Notes
+<at most three, in one or two lines, or "None.">
 
 ## Checks
 | Check | Result |
@@ -97,7 +116,7 @@ Write the report in this shape. The first line is the verdict, so a reader or a 
 | `pnpm check` | passed |
 | verify-teach proof | missing: needed for a user-visible change, not in the PR body |
 
-Reviewed `<short headRefOid>`. Spec: #<N>. Dropped: <count and reason, or "none">.
+Reviewed `<short headRefOid>`. Spec: #<N>. Context: <plan docs and flags read, or "none">. Dropped: <count and reason, or "none">.
 ```
 
 For **PASS**, write `None.` under "Must fix".
