@@ -1,5 +1,6 @@
 ---
 name: rtl-check
+disable-model-invocation: true
 description: Scan the codebase for directional CSS properties that are missing RTL handling. Reports violations grouped by file with suggested fixes using logical properties or theme.dir conditionals.
 ---
 
