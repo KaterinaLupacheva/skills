@@ -4,7 +4,7 @@
 
 **Goal.** <What is observably true after this step, and what does not use it yet.>
 
-Read README decisions <D numbers> before you start.
+Read decisions <D numbers> from `decisions.md` before you start, with the command in the README **How to run a step**.
 
 ## Files
 
